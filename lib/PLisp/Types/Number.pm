@@ -10,4 +10,20 @@ use warnings;
 package PLisp::Types::Number;
 use parent qw(PLisp::Types::T);
 
+sub print_object {
+    my $self = shift;
+    my $stream = shift;
+
+    $stream->print($$self);
+}
+
+sub stringify {
+    my $self = shift;
+
+    my $type = uc ref $self;
+    $type =~ s|^PLisp::Types::||i;
+    $type =~ s|_|-|g;
+    return sprintf "#<%s 0x%p: %s>", $type, refaddr $self, "$$self";
+}
+
 1;

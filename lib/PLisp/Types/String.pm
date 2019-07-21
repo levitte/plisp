@@ -22,10 +22,11 @@ sub new {
     return bless \$string, $class;
 }
 
-sub format {
+sub print_object {
     my $self = shift;
+    my $stream = shift;
 
-    return "$$self";
+    $stream->print($$self);
 }
 
 # Get a perl string

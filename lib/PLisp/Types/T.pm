@@ -11,6 +11,7 @@ package PLisp::Types::T;
 
 use Class::ISA;
 use Carp;
+use Scalar::Util qw(refaddr);
 
 my $defined = 0;
 sub new {
@@ -35,10 +36,22 @@ sub typep {
     return 0;
 }
 
-sub format {
+sub print_object {
+    my $self = shift;
+    my $stream = shift;
+
+    $stream->print($self->stringify());
+}
+
+sub stringify {
     my $self = shift;
 
-    croak "Dunno how to format this...";
+    return "T" if ref $self eq __PACKAGE__;
+
+    my $type = uc ref $self;
+    $type =~ s|^PLisp::Types::||i;
+    $type =~ s|_|-|g;
+    return sprintf "#<%s 0x%p>", $type, refaddr $self;
 }
 
 #sub AUTOLOAD {

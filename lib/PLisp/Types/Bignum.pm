@@ -19,10 +19,4 @@ sub new {
     return bless \$number, $class;
 }
 
-sub format {
-    my $self = shift;
-
-    return "$$self";
-}
-
 1;

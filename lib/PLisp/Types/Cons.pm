@@ -42,4 +42,12 @@ sub cdr {
     return $old;
 }
 
+sub stringify {
+    my $self = shift;
+
+    return "#<CONS ( "
+        . $self->car->stringify() . " . " . $self->cdr->stringify()
+        . " )>";
+}
+
 1;

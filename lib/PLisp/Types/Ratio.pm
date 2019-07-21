@@ -19,9 +19,10 @@ sub new {
     return bless \$number, $class;
 }
 
-sub format {
+sub print_object {
     my $self = shift;
+    my $stream = shift;
 
-    return join('/', "$$self->parts");
+    $stream->print($$self);
 }
 1;

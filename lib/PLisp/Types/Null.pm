@@ -22,4 +22,11 @@ sub new {
     return bless {}, $class;
 }
 
+sub stringify {
+    my $self = shift;
+
+    return "NIL" if ref $self eq __PACKAGE__;
+    croak "Don't know how to stringify $self";
+}
+
 1;

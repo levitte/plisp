@@ -10,6 +10,8 @@ use warnings;
 package PLisp::Types::Symbol;
 use parent qw(PLisp::Types::T);
 
+use PLisp::BuiltinKeywords;
+use PLisp::BuiltinPackages;
 use PLisp::BuiltinValues;
 use PLisp::Types::String;
 use Carp;
@@ -66,10 +68,38 @@ sub function {
     return $self->[4] = $function;
 }
 
-sub format {
+sub print_object {
+    my $self = shift;
+    my $stream = shift;
+    my %opts = @_;
+
+    my $package_name = '#';      # Default uninterned
+    my $package_separator = ':'; # Default external
+    if (defined $self->package) {
+        my ($object, $status) = PACKAGE->find_symbol($self->name);
+        $package_name = '';     # Default to no package name
+        if ($object == $self && $status != K_INTERNAL) {
+            $package_separator = '';
+        } else {
+            ($object, $status) = $self->package->find_symbol($self->name);
+            $package_separator = '::' if $status == K_INTERNAL;
+            $package_name = $self->package->name->as_str()
+                unless $self->package == P_KEYWORD;
+        }
+    }
+    $stream->print($package_name, $package_separator, $self->name->as_str());
+}
+
+sub stringify {
     my $self = shift;
 
-    return $self->name->format;
+    my $name = $self->name->as_str();
+    my $package = $self->package;
+    my $package_name = defined $package ? $package->name->as_str() . ":" : "";
+
+    return
+        sprintf "#<SYMBOL 0x%p: %s%s>",
+        refaddr $self, $package_name, $name;
 }
 
 1;
