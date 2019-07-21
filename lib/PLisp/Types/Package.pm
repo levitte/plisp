@@ -13,6 +13,7 @@ use parent qw(PLisp::Types::T);
 use PLisp::Types::Symbol;
 use PLisp::BuiltinValues;
 use PLisp::BuiltinKeywords;
+use PLisp::BuiltinPackages;
 use Carp;
 
 sub new {
@@ -44,6 +45,8 @@ sub find_symbol {
 
     if (ref $name eq 'PLisp::Types::String') {
         $name = $name->as_str();
+    } else {
+        die 'invalid symbol name ', $name->stringify() unless ref $name eq '';
     }
 
     my $check = $self->{symbols}->{$name};
@@ -60,6 +63,38 @@ sub find_symbol {
     return ( NIL, NIL );
 }
 
+# Perl variant of the IMPORT function
+sub do_import {
+    my $self = shift;
+    my $symbols = shift;
+    my %opts = @_;
+
+    my $status =
+        $opts{_status} // ($self == P_KEYWORD ? K_EXTERNAL : K_INTERNAL);
+
+    # In case this was called with just one symbol and not a whole array
+    if (ref $symbols ne 'ARRAY') {
+        $symbols = [ $symbols ];
+    }
+
+    foreach (@$symbols) {
+        die "not a symbol" unless ref $_ eq 'PLisp::Types::Symbol';
+
+        my $name = $_->name->as_str();
+        my $check = $self->{symbols}->{$name};
+
+        die "package-error" if defined $check && $check->[0] != $_;
+    }
+
+    foreach (@$symbols) {
+        my $name = $_->name->as_str();
+
+        $_->package($self) unless defined $_->package();
+        $self->{symbols}->{$name} = [ $_, $status ];
+    }
+
+}
+
 sub intern {
     my $self = shift;
     my $name = shift;
@@ -67,14 +102,18 @@ sub intern {
 
     if (ref $name eq 'PLisp::Types::String') {
         $name = $name->as_str();
+    } else {
+        die 'invalid symbol name ', $name->stringify() unless ref $name eq '';
     }
 
     my $check = $self->{symbols}->{$name};
 
+    # If the name is already interned, just return it.
     return @$check if defined $check;
 
-    my $symbol = PLisp::Types::Symbol->new($name, package => $self);
-    $self->{symbols}->{$name} = [ $symbol, $opts{_status} // K_INTERNAL ];
+    my $symbol = PLisp::Types::Symbol->new($name);
+    $symbol->value($symbol) if $self == P_KEYWORD;
+    $self->do_import($symbol, %opts);
 
     return ( $symbol, NIL );
 }

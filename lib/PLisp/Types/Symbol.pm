@@ -40,8 +40,10 @@ sub name {
 
 sub package {
     my $self = shift;
+    my $package = shift;
 
-    return $self->[1];
+    return $self->[1] unless defined $package;
+    return $self->[1] = $package;
 }
 
 sub plist {

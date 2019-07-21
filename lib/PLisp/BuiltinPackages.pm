@@ -36,10 +36,16 @@ sub populate_package {
     foreach my $pair (pairs @pairs) {
         my ($key, $value) = @$pair;
 
-        croak "Initial value not defined for $key" unless defined $value;
+        if (ref $key eq '') {
+            my @sym = $package->intern($key, %opts);
+            $key = $sym[0];
+        } else {
+            $package->do_import($key, %opts);
+        }
 
-        my @sym = $package->intern($key, %opts);
-        $sym[0]->value($value) if defined $value;
+        if (defined $value) {
+            $key->value($value);
+        }
     }
 }
 
