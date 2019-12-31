@@ -31,6 +31,8 @@ sub typep {
         croak "Dafuq? : $_" unless m|^PLisp::Types::|;
 
         my $l_type = uc $';
+        $l_type =~ s|_|-|g;
+
         return 1 if $type eq $l_type;
     }
     return 0;
