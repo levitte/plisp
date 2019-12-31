@@ -15,6 +15,7 @@ use Exporter qw(import);
 our @EXPORT =qw(reader);
 
 use IO::File;
+use PLisp::Types::End_Of_File;
 use PLisp::Types::Bignum;
 use PLisp::Types::Ratio;
 use PLisp::Types::Cons;
@@ -47,7 +48,7 @@ sub r {
     #    syntax type of x to one of steps 2 to 7.
     $x = $stream->getc;
     unless (defined $x) {
-	die "end-of-file" if $eof_error_p || $recursive_p;
+	die PLisp::Types::End_Of_File->new() if $eof_error_p || $recursive_p;
 	return $eof_value;
     }
 
@@ -109,7 +110,7 @@ sub r {
     #    begin a token, and step 8 is entered.
     if ($type == PLisp::Types::Readtable->c_single_escape) {
 	$y = $stream->getc;
-	die "end-of-file" unless defined $y;
+	die PLisp::Types::End_Of_File->new() unless defined $y;
 
 	$token .= $y;
         $escaped = 1;
@@ -170,7 +171,7 @@ sub r {
     #       repeated.
     if ($type == PLisp::Types::Readtable->c_single_escape) {
 	$z = $stream->getc;
-	die "end-of-file" unless defined $z;
+	die PLisp::Types::End_Of_File->new() unless defined $z;
 	$token .= $z;
         $escaped = 1;
 	goto accumulate_token;
@@ -230,7 +231,7 @@ sub r {
     #       appended to the token being built, and step 9 is repeated.
     if ($type == PLisp::Types::Readtable->c_single_escape) {
 	$z = $stream->getc;
-	die "end-of-file" unless defined $z;
+	die PLisp::Types::End_Of_File->new() unless defined $z;
 	$token .= $z;
 	goto accumulate_token;
     }
@@ -329,7 +330,7 @@ sub read_delimited_list {
 
     while (1) {
 	my $x = $stream->getc;
-	die "end-of-file" unless defined $x && $recursive_p;
+	die PLisp::Types::End_Of_File->new() unless defined $x && $recursive_p;
 	return $list unless defined $x;
 	my $type = $readtable->type($x);
 	next if $type == PLisp::Types::Readtable->c_whitespace;

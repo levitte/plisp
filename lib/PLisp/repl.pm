@@ -30,7 +30,7 @@ sub repl {
     my $estream = IO::Handle->new_from_fd(fileno(STDERR), 'w');
 
     while(1) {
-        $ostream->print(">>> ");
+        $ostream->print('>>> ');
         $ostream->flush;
         my $form = eval { PLisp::reader::r($istream, READTABLE); };
         my $object =
@@ -43,13 +43,23 @@ sub repl {
             $ostream->print('=> ');
             PLisp::printer::p($ostream, $object);
             $ostream->print("\n");
-        } elsif ($istream->eof) {
-            $ostream->print("\n");
-            last;
         } else {
-            $estream->print("### ", $@);
+            if (ref($@) ne '' && $@->typep('end-of-file')) {
+                $@->print_object($estream) if $ENV{PLISP_DEBUG};
+                $estream->print("\n");
+                $estream->flush;
+                last;
+            }
+
+            $estream->print('### ');
+            if (ref($@) eq '') {
+                $estream->print('Perl error: ', $@);
+            } else {
+                $@->print_object($estream);
+            }
             $estream->print("\n");
             $estream->flush;
         }
     }
+    $ostream->flush;
 }
