@@ -51,13 +51,41 @@ sub find_symbol {
 
     my $check = $self->{symbols}->{$name};
 
+    if ($ENV{PLISP_DEBUG}) {
+        print STDERR "DEBUG[", __PACKAGE__, "::find_symbol]",
+            " ", '>' x $opts{_recursion},
+            " current data for $name is ",
+            (defined $symbol
+             ? ( "[ ", join(", ", map { $_->stringify() } @$check), " ]" )
+             : "undefined"),
+            "\n";
+    }
+
     return @$check if defined $check;
 
     foreach (@{$self->{use}}) {
+        if ($ENV{PLISP_DEBUG}) {
+            print STDERR "DEBUG[", __PACKAGE__,"::find_symbol]",
+                " ", '>' x $opts{_recursion},
+                " looking for inherited $name in ", $_->name->as_str(), "\n";
+        }
+
         my @symbol = $_->find_symbol($name);
         next if $symbol[0] == NIL || $symbol[1] == K_INTERNAL;
 
+        if ($ENV{PLISP_DEBUG}) {
+            print STDERR "DEBUG[", __PACKAGE__,"::find_symbol]",
+                " ", '>' x $opts{_recursion},
+                " found it!\n";
+        }
+
         return ( $symbol[0], K_INHERITED );
+    }
+
+    if ($ENV{PLISP_DEBUG}) {
+        print STDERR "DEBUG[", __PACKAGE__,"::find_symbol]",
+            " ", '>' x $opts{_recursion},
+            " found nothing\n";
     }
 
     return ( NIL, NIL );
@@ -91,8 +119,18 @@ sub do_import {
 
         $_->package($self) unless defined $_->package();
         $self->{symbols}->{$name} = [ $_, $status ];
-    }
 
+        if ($ENV{PLISP_DEBUG}) {
+            print STDERR "DEBUG[", __PACKAGE__,"::do_import]",
+                " new entry for ", $name,
+                " in ", $self->name->as_str(),
+                " is ",
+                "[ ",
+                join(", ",
+                     map { $_->stringify() } @{$self->{symbols}->{$name}}),
+                " ]\n";
+        }
+    }
 }
 
 sub intern {

@@ -305,6 +305,12 @@ sub r {
         }
     }
 
+    if ($ENV{PLISP_DEBUG}) {
+        print STDERR "DEBUG[", __PACKAGE__, "::r]",
+            " package is ",$package->name->as_str(), "\n";
+        print STDERR "DEBUG[", __PACKAGE__, "::r]",
+            " token is $token\n";
+    }
     if (defined $package) {
         ($object, my $status) = $package->find_symbol($token);
         if ($object == NIL) {
@@ -314,6 +320,14 @@ sub r {
         }
     } else {
         $object = PLisp::Types::Symbol->new($token);
+    }
+    if ($ENV{PLISP_DEBUG}) {
+        print STDERR "DEBUG[", __PACKAGE__, "::r]",
+            " resulting ", ref $object, " object is ",
+            $object->stringify(), "; ",
+            (defined $object->package
+             ? "uninterned"
+             : ( "interned in ", $object->package->name->as_str() )), "\n";
     }
     return $object;
 }

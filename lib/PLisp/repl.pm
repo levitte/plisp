@@ -47,6 +47,12 @@ sub repl {
             if (ref($@) ne '' && $@->typep('end-of-file')) {
                 $@->print_object($estream) if $ENV{PLISP_DEBUG};
                 $estream->print("\n");
+
+                if ($ENV{PLISP_DEBUG}) {
+                    print STDERR "DEBUG[", __PACKAGE__, "::repl]",
+                        " condition is ", $@->stringify(), "\n";
+                }
+
                 $estream->flush;
                 last;
             }

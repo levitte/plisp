@@ -120,6 +120,15 @@ sub e {
     my $form = shift;
     my $lexenv = shift;
 
+
+    if ($ENV{PLISP_DEBUG}) {
+        local $| = 1;           # Autoflush
+        print STDERR "DEBUG[", __PACKAGE__, "::e]",
+            " \$form is ", $form->stringify(), "\n";
+        print STDERR "DEBUG[", __PACKAGE__, "::e]",
+            " \$lexenv is ", $lexenv->stringify(), "\n";
+    }
+
     # Evaluate a list
     if ($form->typep('cons')) {
         my $first = $form->car;

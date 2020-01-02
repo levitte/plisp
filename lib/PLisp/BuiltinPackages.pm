@@ -37,13 +37,26 @@ sub populate_package {
         my ($key, $value) = @$pair;
 
         if (ref $key eq '') {
+            print STDERR "DEBUG[", __PACKAGE__, "::populate_package]",
+                " about to intern ", $key,
+                " into ", $package->name->as_str(), "\n"
+                if $ENV{PLISP_DEBUG};
+
             my @sym = $package->intern($key, %opts);
             $key = $sym[0];
         } else {
+            print STDERR "DEBUG[", __PACKAGE__, "::populate_package]",
+                " about to import ", $key->name->as_str(),
+                " into ", $package->name->as_str(), "\n"
+                if $ENV{PLISP_DEBUG};
+
             $package->do_import($key, %opts);
         }
-
         if (defined $value) {
+            print STDERR "DEBUG[", __PACKAGE__, "::populate_package]",
+                " about to give ", $key->name->as_str(),
+                " the value ", $value->stringify(), "\n"
+                if $ENV{PLISP_DEBUG};
             $key->value($value);
         }
     }
