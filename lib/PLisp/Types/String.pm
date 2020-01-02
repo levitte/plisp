@@ -19,6 +19,10 @@ sub new {
 
     croak "Invalid string" unless defined $string;
 
+    return $string if ref $string eq $class;
+
+    croak "Invalid string" unless ref $string eq '';
+
     return bless \$string, $class;
 }
 
