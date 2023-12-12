@@ -14,3 +14,5 @@ To run the interpreter, do:
 ```
 perl plisp.pl
 ```
+
+**NOTE: This repositody has moved to https://codeberg.org/levitte/plisp**
